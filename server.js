@@ -36,6 +36,11 @@ app.get('/people/:person', function (req, res, next) {
   }
 });
 
+app.post('/people/:person/addPhoto', function (req, res, next) {
+  var person = req.params.person;
+  console.log("== Got POST request for", person);
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('*', function (req, res) {

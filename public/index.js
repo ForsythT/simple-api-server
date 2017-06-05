@@ -70,6 +70,30 @@ function insertNewPhoto() {
 
     var personID = getPersonIDFromLocation();
     if (personID) {
+      console.log("== Person ID:", personID);
+
+
+      storePersonPhoto(personID, photoURL, photoCaption, function (err) {
+
+        if (err) {
+          alert("Unable to save person's photo.  Got this error:\n\n" + err);
+        } else {
+
+          var photoCardTemplate = Handlebars.templates.photoCard;
+          var templateArgs = {
+            url: photoURL,
+            caption: photoCaption
+          };
+
+          var photoCardHTML = photoCardTemplate(templateArgs);
+          // console.log(photoCardHTML);
+
+          var photoCardContainer = document.querySelector('.photo-card-container');
+          photoCardContainer.insertAdjacentHTML('beforeend', photoCardHTML);
+
+        }
+
+      });
 
     }
 
@@ -89,6 +113,18 @@ function insertNewPhoto() {
  * photo for a given person.
  */
 function storePersonPhoto(personID, url, caption, callback) {
+
+  var postURL = "/people/" + personID + "/addPhoto";
+
+  var postRequest = new XMLHttpRequest();
+  postRequest.open('POST', postURL);
+  postRequest.setRequestHeader('Content-Type', 'application/json');
+
+  var postBody = {
+    url: url,
+    caption: caption
+  };
+  postRequest.send(JSON.stringify(postBody));
 
 }
 
