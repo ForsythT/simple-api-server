@@ -72,7 +72,6 @@ function insertNewPhoto() {
     if (personID) {
       console.log("== Person ID:", personID);
 
-
       storePersonPhoto(personID, photoURL, photoCaption, function (err) {
 
         if (err) {
@@ -119,6 +118,14 @@ function storePersonPhoto(personID, url, caption, callback) {
   var postRequest = new XMLHttpRequest();
   postRequest.open('POST', postURL);
   postRequest.setRequestHeader('Content-Type', 'application/json');
+
+  postRequest.addEventListener('load', function (event) {
+    var error;
+    if (event.target.status !== 200) {
+      error = event.target.response;
+    }
+    callback(error);
+  });
 
   var postBody = {
     url: url,

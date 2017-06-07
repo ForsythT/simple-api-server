@@ -1,6 +1,8 @@
 var path = require('path');
+var fs = require('fs');
 var express = require('express');
 var exphbs = require('express-handlebars');
+var bodyParser = require('body-parser');
 
 var peopleData = require('./peopleData');
 var app = express();
@@ -8,6 +10,8 @@ var port = process.env.PORT || 3000;
 
 app.engine('handlebars', exphbs({defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
+
+app.use(bodyParser.json());
 
 app.get('/people', function (req, res, next) {
 
@@ -37,8 +41,34 @@ app.get('/people/:person', function (req, res, next) {
 });
 
 app.post('/people/:person/addPhoto', function (req, res, next) {
-  var person = req.params.person;
-  console.log("== Got POST request for", person);
+  var person = peopleData[req.params.person];
+
+  if (person) {
+    if (req.body && req.body.url) {
+
+      var photo = {
+        url: req.body.url,
+        caption: req.body.caption
+      };
+
+      person.photos = person.photos || [];
+
+      person.photos.push(photo);
+      fs.writeFile('peopleData.json', JSON.stringify(peopleData), function (err) {
+        if (err) {
+          res.status(500).send("Unable to save photo to \"database\".");
+        } else {
+          res.status(200).send();
+        }
+      });
+
+    } else {
+      res.status(400).send("Person photo must have a URL.");
+    }
+
+  } else {
+    next();
+  }
 });
 
 app.use(express.static(path.join(__dirname, 'public')));
